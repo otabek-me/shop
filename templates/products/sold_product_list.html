@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<h3>Sotilgan mahsulotlar</h3>
+<p>Umumiy foyda - {{ sum_profit }}</p>
+{% for pro in sold_products %}
+    <span>{{ pro.product.name }}({{ pro.product.color }}) | Sotildi:{{ pro.price|intcomma }}/{{ pro.product.tannarx }} | Soni:{{ pro.quantity }} | Foyda:{{ pro.profit|intcomma }}</span><br>
+{% endfor %}
+{% endblock content %}

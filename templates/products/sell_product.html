@@ -1,25 +1,22 @@
 {% extends 'base.html' %}
-{% load humanize %}
 {% block content %}
 <h3>Mahsulot sotish</h3>
-<form method="post">{% csrf_token %}
-    {{ form }}
-    <button type="submit">Submit</button>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}  <input type="hidden" name="next" value="{{ request.GET.next|default:request.META.HTTP_REFERER }}">
+
+    <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-<select class="form-control select2-mahsulot" name="product" style="width: 100%; !important;">
-    {% for product in products %}
-        <option value="{{ product.slug }}">{{ product.name }} — {{ product.sotish|intcomma }} so'm (Qoldiq: {{ product.son }} ta)</option>
-    {% endfor %}
-</select>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
     $(document).ready(function() {
-        $('.select2-mahsulot').select2({
+        // Django formasi yaratgan 'select' elementiga Select2 ni biriktiramiz
+        $('.select2-product').select2({
             placeholder: "Mahsulot nomini yoki kodini yozing...",
             allowClear: true
         });

@@ -1,3 +1,6 @@
+from itertools import product
+
+from django.db.models import Sum, F
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 from .models import Product, Skalat, Category, SoldProduct
@@ -38,6 +41,19 @@ class SellProductView(CreateView):
 
     def form_valid(self, form):
         form.instance.seller = self.request.user
+
+        sold_item = form.save(commit=False)
+        product = sold_item.product
+
+        quantity_sold = form.cleaned_data.get('quantity_sold', 1)
+
+        if product.son >= quantity_sold:
+            product.son -= quantity_sold
+            product.save()
+        else:
+            form.add_error('product', "Mahsulot yetarli emas!")
+            return self.form_invalid(form)
+
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -80,3 +96,18 @@ class CreateCategoryView(CreateView):
     form_class = CreateCategoryForm
     template_name = 'products/create_category.html'
     success_url = reverse_lazy('create-product')
+
+class SoldProductListView(ListView):
+    model = SoldProduct
+    template_name = 'products/sold_product_list.html'
+    context_object_name = 'sold_products'
+    ordering = ['-sold_at']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        queryset = self.get_queryset()
+
+        sum_profit = queryset.aggregate(jami_foyda = Sum((F('product__tannarx') - F('price')) * F('quantity')))['jami_foyda']
+
+        context['sum_profit'] = sum_profit
+        return context
