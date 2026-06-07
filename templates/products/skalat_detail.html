@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>{{ skalat.name }} - skladi haqida batafsil</h3>
+<h4>Mahsulotlar</h4>
+{% for product in products %}
+    <a href="{% url 'product-detail' product.slug %}">{{ product.name }}   ----- {{ product.son }} dona</a>
+{% endfor %}
+{% endblock content %}

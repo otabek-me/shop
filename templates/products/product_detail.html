@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<h3>Mahsulot haqida batafsil</h3>
+<h4>{{ product.name }} {{ product.sotish|intcomma }} so'm --- {{ product.son }} ta qolgan</h4>
+<a href="{% url 'product-update' product.slug %}">Tahrirlash</a>
+<a href="{% url 'sell-product' %}">Sotish</a>
+{% endblock content %}

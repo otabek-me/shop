@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Yangi mahsulot</h3>
+<a href="{% url 'create-category' %}">yangi category</a>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+{% endblock content %}

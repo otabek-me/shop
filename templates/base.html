@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <nav>
+        {% if user.is_authenticated %}
+            <h4>Logged in as >> {{ user.get_full_name }}</h4>
+        {% endif %}
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'login' %}"> | Login | </a>
+        <a href="{% url 'signup' %}"> | Signup | </a>
+        <a href="{% url 'profile' %}"> | Profile | </a>
+        <a href="{% url 'profile-update' %}"> | Profile yangilash | </a>
+        <br>
+        <a href="{% url 'product-list' %}">Mahsulotlar</a>
+        <a href="{% url 'skalat-list' %}">Skladlar</a>
+
+
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Chiqish</button>
+        </form>
+    </nav>
+    {% block content %}
+    {% endblock content %}
+</body>
+</html>

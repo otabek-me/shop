@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Skladlar ro'yxati</h3>
+
+{% for sklad in skalats %}
+    <a href="{% url 'skalat-detail' sklad.pk %}">{{ sklad.name }}</a>
+{% endfor %}
+
+<a href="{% url 'create-skalat' %}">Yangi</a>
+
+
+{% endblock content %}
