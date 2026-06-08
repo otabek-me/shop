@@ -3,7 +3,7 @@
 <h3>{{ skalat.name }} - skladi haqida batafsil</h3>
 <h4>Mahsulotlar</h4>
 {% for product in products %}
-    <a href="{% url 'product-detail' product.slug %}">{{ product.name }}   - {{ product.son }} dona</a>
+    <a href="{% url 'product-detail' product.slug %}">{{ product.name }}  - {{ product.son }} dona</a>
 {% endfor %}
 <form method="post" action="{% url 'skalat-delete' skalat.pk %}">
     {% csrf_token %}

@@ -2,8 +2,21 @@
 {% load humanize %}
 {% block content %}
 <h3>Sotilgan mahsulotlar</h3>
+{% if user.is_superuser %}
 <p>Umumiy foyda - {{ sum_profit }}</p>
+{% endif %}
+<form method="get" >
+    {% csrf_token %}
+    <input type="date" name="start" value=" {{ request.GET.start }}" required>
+    <input type="date" name="end" value="{{ request.GET.end }}" required>
+    <button type="submit">submit</button>
+</form>
+<form method="get" id="delivery-form">
+    {% csrf_token %}
+    <label for="not-delivered">Yetkazilmaganlar</label>
+    <input type="checkbox" id="not-delivered" name="filterr" onchange="this.form.submit()">
+</form>
 {% for pro in sold_products %}
-    <span>{{ pro.product.name }}({{ pro.product.color }}) | Sotildi:{{ pro.price|intcomma }}/{{ pro.product.tannarx }} | Soni:{{ pro.quantity }} | Foyda:{{ pro.profit|intcomma }}</span><br>
+    <a href="{% url 'sold-product-detail' pro.pk %}">{{ pro.product.name }}({{ pro.product.color }}) | Sotildi:{{ pro.price|intcomma }}/{{ pro.product.tannarx }} | Soni:{{ pro.quantity }} | Foyda:{{ pro.profit|intcomma }} | {% if pro.delievered %} Yetkazilgan {% else %} Yetkazilmagan {% endif %}</a><br>
 {% endfor %}
 {% endblock content %}

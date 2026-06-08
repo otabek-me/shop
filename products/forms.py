@@ -84,3 +84,8 @@ class SellProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['product'].label_from_instance = lambda obj: f"{obj.name} - {obj.color} ({obj.son} ta qoldi)"
+
+class DeliverSoldProductForm(forms.ModelForm):
+    class Meta:
+        model = SoldProduct
+        fields = ('delievered_by',)

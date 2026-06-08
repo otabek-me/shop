@@ -1,10 +1,10 @@
-from itertools import product
-
+from django.utils import timezone
 from django.db.models import Sum, F
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 from .models import Product, Skalat, Category, SoldProduct
-from .forms import CreateProductForm, ProductUpdateForm, CreateSkalatForm, CreateCategoryForm, SellProductForm
+from .forms import CreateProductForm, ProductUpdateForm, CreateSkalatForm, CreateCategoryForm, SellProductForm, DeliverSoldProductForm
+
 
 
 class CreateProductView(CreateView):
@@ -109,5 +109,43 @@ class SoldProductListView(ListView):
 
         sum_profit = queryset.aggregate(jami_foyda = Sum((F('product__tannarx') - F('price')) * F('quantity')))['jami_foyda']
 
-        context['sum_profit'] = sum_profit
+
+        # no_yet = queryset.filter('-delievered')
+
+        context['sum_profit'] = sum_profit if sum_profit else 0
+
         return context
+
+    def get_queryset(self):
+        result = self.model.objects.all()
+
+        query1 = self.request.GET.get('start')
+        query2 = self.request.GET.get('end')
+        filterr = self.request.GET.get('filterr')
+
+        if query1 and query2:
+            result = result.filter(sold_at__range=(query1, query2))
+        if filterr:
+            result = result.order_by('delievered', '-sold_at')
+        return result
+
+class SoldProductDetailView(DetailView):
+    model = SoldProduct
+    template_name = 'products/sold_product_detail.html'
+    context_object_name = 'sold_product'
+
+class DeliverSoldProductView(UpdateView):
+    model = SoldProduct
+    template_name = 'products/deliver_sold_product.html'
+    success_url = reverse_lazy('sold-products')
+    form_class = DeliverSoldProductForm
+
+    def form_valid(self, form):
+        sold_item = form.save(commit=False)
+
+        sold_item.delievered_at = timezone.now()
+        sold_item.delievered = True
+
+        sold_item.save()
+
+        return super().form_valid(form)

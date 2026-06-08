@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Sotilgan mahsulot haqida batafsil</h3>
+Nomi:{{ sold_product.product.name }}
+Rang:{{ sold_product.product.color }}
+Tannarx:{{ sold_product.product.tannax }}
+Sotildi:{{ sold_product.price }}
+Adress:{{ sold_product.address }}
+Egasi: {{ sold_product.owner }}
+Telefoon raqami: {{ sold_product.owner_phone }}
+{% if sold_product.delievered %}
+yetkazilgan
+Yetkazuvchi: {{ sold_product.delievered_by.get_full_name }}
+Yetkazilgan sana: {{ sold_product.delievered_at }}
+{% else %}
+yetkazilmagan
+<a href="{% url 'sold-product-deliever' sold_product.pk %}">yetkazish</a>
+{% endif %}
+
+{% endblock content %}
