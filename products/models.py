@@ -55,4 +55,4 @@ class SoldProduct(models.Model):
 
     @property
     def profit(self):
-        return (self.product.tannarx - self.price) * self.quantity
+        return (self.price - self.product.tannarx) * self.quantity
