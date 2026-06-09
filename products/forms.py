@@ -89,3 +89,8 @@ class DeliverSoldProductForm(forms.ModelForm):
     class Meta:
         model = SoldProduct
         fields = ('delievered_by',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Select maydonida foydalanuvchining to‘liq ismi yoki emailini ko‘rsatish
+        self.fields['delievered_by'].label_from_instance = lambda obj: obj.get_full_name() or obj.email
