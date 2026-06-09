@@ -1,5 +1,213 @@
 {% extends 'base.html' %}
-{% block content %}
-<h3>Bosh sahifa</h3>
+{% load static %}
+{% load humanize %}
 
-{% endblock content %}
+{% block title %}Bosh sahifa | Ombor Boshqaruvi{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Xush kelibsiz -->
+    <div class="welcome-section">
+        <div class="welcome-text">
+            <h2><i class="fas fa-hand-peace"></i>
+                {% if user.is_authenticated %}
+                    Salom, {{ user.first_name|default:user.email }}!
+                {% else %}
+                    MyStock tizimiga xush kelibsiz!
+                {% endif %}
+            </h2>
+            <p>
+                {% if user.is_authenticated %}
+                    Ombor tizimiga xush kelibsiz. Bugungi faoliyatingizni ko‘rib chiqing.
+                {% else %}
+                    Iltimos, tizimga kiring yoki ro‘yxatdan o‘ting.
+                {% endif %}
+            </p>
+        </div>
+        <div class="date-badge">
+            <i class="fas fa-calendar-alt"></i> {% now "d.m.Y" %}
+        </div>
+    </div>
+
+    <!-- Statistik kartalar -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+            <div class="stat-info">
+                <h4>Jami mahsulotlar</h4>
+                <div class="stat-number">{{ total_products }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-warehouse"></i></div>
+            <div class="stat-info">
+                <h4>Omborlar soni</h4>
+                <div class="stat-number">{{ total_skalats }}</div>
+            </div>
+        </div>
+        {% if total_sold is not None %}
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+            <div class="stat-info">
+                <h4>Sotilgan mahsulotlar</h4>
+                <div class="stat-number">{{ total_sold }}</div>
+            </div>
+        </div>
+        {% endif %}
+        {% if total_profit is not None %}
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-info">
+                <h4>Umumiy foyda</h4>
+                <div class="stat-number">{{ total_profit|intcomma }} <small>so'm</small></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Grafik va tezkor harakatlar (faqat tizimga kirganlar) -->
+    {% if user.is_authenticated %}
+    <div class="content-grid">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-line text-indigo-500"></i> So‘nggi 7 kunlik sotuvlar
+                {% if not user.is_superuser %}
+                <span class="text-xs text-gray-500 ml-2">(faqat sizning sotuvlaringiz)</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <canvas id="salesChart" height="200"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-bolt text-yellow-500"></i> Tezkor harakatlar
+            </div>
+            <div class="card-body" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <a href="{% url 'sell-product' %}" class="btn-primary" style="display: block; text-align: center;">
+                    <i class="fas fa-cart-plus"></i> Sotish qo‘shish
+                </a>
+                <a href="{% url 'create-product' %}" class="btn-secondary" style="display: block; text-align: center;">
+                    <i class="fas fa-plus"></i> Yangi mahsulot
+                </a>
+                <a href="{% url 'create-skalat' %}" class="btn-secondary" style="display: block; text-align: center;">
+                    <i class="fas fa-warehouse"></i> Yangi ombor
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="content-grid">
+        <!-- Kam miqdordagi mahsulotlar (faqat tizimga kirganlar) -->
+        {% if user.is_authenticated %}
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle text-red-500"></i> Kam miqdordagi mahsulotlar (≤3)
+            </div>
+            <div class="card-body">
+                {% if low_stock_products %}
+                    {% for product in low_stock_products %}
+                    <div class="product-item">
+                        <div>
+                            <div class="product-name">{{ product.name }}</div>
+                            <div class="product-category">{{ product.category.name }}</div>
+                        </div>
+                        <div class="product-stock">{{ product.son }} dona</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-message">Kam miqdordagi mahsulotlar yo‘q.</div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle text-blue-500"></i> Tizimga kiring
+            </div>
+            <div class="card-body" style="text-align: center; padding: 2rem;">
+                <i class="fas fa-lock" style="font-size: 3rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+                <p>To‘liq ma'lumotlarni ko‘rish uchun tizimga kiring.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'login' %}" class="btn-primary" style="display: inline-block;">Kirish</a>
+                    <a href="{% url 'signup' %}" class="btn-secondary" style="display: inline-block;">Ro‘yxatdan o‘tish</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- So‘nggi sotuvlar (faqat tizimga kirganlar) -->
+        {% if user.is_authenticated %}
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-history text-blue-500"></i> So‘nggi sotilgan mahsulotlar
+                {% if not user.is_superuser %}
+                <span class="text-xs text-gray-500 ml-2">(faqat sizning sotuvlaringiz)</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if recent_sales %}
+                    {% for sale in recent_sales %}
+                    <div class="sale-item">
+                        <div>
+                            <div class="sale-product">{{ sale.product.name }} ({{ sale.quantity }} dona)</div>
+                            <div class="sale-date">{{ sale.sold_at|date:"d.m.Y H:i" }}</div>
+                        </div>
+                        <div class="sale-price">{{ sale.price|intcomma }} so'm</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-message">Hali hech qanday sotuv amalga oshirilmagan.</div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-simple text-green-500"></i> Statistikadan namuna
+            </div>
+            <div class="card-body">
+                <p class="text-gray-600">Tizimda jami <strong>{{ total_products }}</strong> ta mahsulot va <strong>{{ total_skalats }}</strong> ta ombor mavjud.</p>
+                <p class="text-gray-600 mt-2">Sotuvlar va foyda ma'lumotlarini ko‘rish uchun tizimga kiring.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+{% if user.is_authenticated %}
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ week_labels|safe }},
+            datasets: [{
+                label: 'Sotuvlar soni',
+                data: {{ sales_last_week|safe }},
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

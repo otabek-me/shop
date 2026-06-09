@@ -1,4 +1,88 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mening profilim{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h3>{{ user.get_full_name }}</h3>
-{% endblock content %}
+<div class="profile-container">
+    <!-- Yuqori qism (gradient) -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="profile-name">{{ user.get_full_name|default:user.email }}</div>
+        <div class="profile-email">{{ user.email }}</div>
+    </div>
+
+    <!-- Asosiy ma'lumotlar kartasi -->
+    <div class="profile-card">
+        <div class="card-title">
+            <i class="fas fa-id-card mr-2 text-indigo-500"></i> Shaxsiy ma'lumotlar
+        </div>
+        <div class="info-row">
+            <div class="info-label">To'liq ism</div>
+            <div class="info-value">
+                <span id="fullname">{{ user.get_full_name|default:"Ko'rsatilmagan" }}</span>
+                <button class="copy-btn" data-copy="fullname"><i class="far fa-copy"></i> Nusxa</button>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Email</div>
+            <div class="info-value">
+                <span id="email">{{ user.email }}</span>
+                <button class="copy-btn" data-copy="email"><i class="far fa-copy"></i> Nusxa</button>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Telefon</div>
+            <div class="info-value">
+                <span id="phone">{{ user.phone|default:"Ko'rsatilmagan" }}</span>
+                {% if user.phone %}
+                <button class="copy-btn" data-copy="phone"><i class="far fa-copy"></i> Nusxa</button>
+                {% endif %}
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">IP manzil</div>
+            <div class="info-value">
+                <span id="ip">{{ user.ip|default:"Noma'lum" }}</span>
+                {% if user.ip %}
+                <button class="copy-btn" data-copy="ip"><i class="far fa-copy"></i> Nusxa</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistika (ixtiyoriy, foydali) -->
+    <div class="profile-card">
+        <div class="card-title">
+            <i class="fas fa-chart-line mr-2 text-indigo-500"></i> Faoliyat statistikasi
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ user.seller.all|length }}</div>
+                <div class="stat-label">Sotilgan mahsulotlar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ user.posted_by.all|length }}</div>
+                <div class="stat-label">Yetkazilgan buyurtmalar</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tahrirlash tugmasi -->
+    <div class="text-center mt-6">
+        <a href="{% url 'profile-update' %}" class="edit-profile-btn">
+            <i class="fas fa-pen"></i> Profilni tahrirlash
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}

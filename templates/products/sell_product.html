@@ -1,25 +1,141 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mahsulot sotish{% endblock %}
+
+{% block extra_css %}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/sell_product.css' %}">
+{% endblock %}
+
 {% block content %}
-<h3>Mahsulot sotish</h3>
+<div class="sell-container">
+    <div class="sell-card">
+        <div class="sell-header">
+            <h3><i class="fas fa-cart-plus mr-2"></i> Mahsulot sotish</h3>
+            <p>Mijozga mahsulot sotish va yetkazib berish ma'lumotlarini kiriting</p>
+        </div>
+        <div class="form-body">
+            <form method="post" id="sell-form" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next|default:request.META.HTTP_REFERER }}">
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}  <input type="hidden" name="next" value="{{ request.GET.next|default:request.META.HTTP_REFERER }}">
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg mb-4 text-red-700 text-sm">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
 
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+                <!-- Mahsulot tanlash -->
+                <div class="input-group">
+                    <label for="{{ form.product.id_for_label }}">
+                        <i class="fas fa-box"></i> Mahsulot
+                    </label>
+                    {{ form.product }}
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+                    {% if form.product.errors %}
+                        <ul class="errorlist">{% for error in form.product.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <!-- Miqdor va narx (2 ustun) -->
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="{{ form.quantity.id_for_label }}">
+                            <i class="fas fa-cubes"></i> Soni (dona)
+                        </label>
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                            <ul class="errorlist">{% for error in form.quantity.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                    <div class="input-group">
+                        <label for="{{ form.price.id_for_label }}">
+                            <i class="fas fa-chart-line"></i> Sotish narxi (so'm)
+                        </label>
+                        {{ form.price }}
+                        {% if form.price.errors %}
+                            <ul class="errorlist">{% for error in form.price.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Jami summa -->
+                <div class="total-price">
+                    Jami summa: <strong id="total-price-value">0 so'm</strong>
+                </div>
+
+                <!-- Mijoz ma'lumotlari -->
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="{{ form.owner.id_for_label }}">
+                            <i class="fas fa-user"></i> Mijozning ismi
+                        </label>
+                        {{ form.owner }}
+                        {% if form.owner.errors %}
+                            <ul class="errorlist">{% for error in form.owner.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                    <div class="input-group">
+                        <label for="{{ form.owner_phone.id_for_label }}">
+                            <i class="fas fa-phone-alt"></i> Telefon raqam
+                        </label>
+                        {{ form.owner_phone }}
+                        <div class="help-text text-gray-500 text-xs">Masalan: +998901234567</div>
+                        {% if form.owner_phone.errors %}
+                            <ul class="errorlist">{% for error in form.owner_phone.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Manzil -->
+                <div class="input-group full-width">
+                    <label for="{{ form.address.id_for_label }}">
+                        <i class="fas fa-map-marker-alt"></i> Yetkazish manzili
+                    </label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <ul class="errorlist">{% for error in form.address.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <!-- Qo'shimcha -->
+                <div class="input-group full-width">
+                    <label for="{{ form.description.id_for_label }}">
+                        <i class="fas fa-sticky-note"></i> Qo'shimcha ma'lumot (ixtiyoriy)
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <ul class="errorlist">{% for error in form.description.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-check-circle mr-2"></i> Sotishni tasdiqlash
+                    </button>
+                    <a href="{% url 'product-list' %}" class="btn-cancel">
+                        <i class="fas fa-times mr-2"></i> Bekor qilish
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Mahsulot ma'lumotlarini JS ga o'tkazish -->
+<script>
+    window.productStockData = {
+        {% for product in products %}
+        "{{ product.id }}": {
+            stock: {{ product.son }},
+            price: {{ product.sotish|default:'null' }},
+            tannarx: {{ product.tannarx }}
+        },
+        {% endfor %}
+    };
+</script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        // Django formasi yaratgan 'select' elementiga Select2 ni biriktiramiz
-        $('.select2-product').select2({
-            placeholder: "Mahsulot nomini yoki kodini yozing...",
-            allowClear: true
-        });
-    });
-</script>
-{% endblock content %}
+<script src="{% static 'js/sell_product.js' %}"></script>
+{% endblock %}

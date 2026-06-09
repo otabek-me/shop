@@ -1,8 +1,123 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load humanize %}
+
+{% block title %}{{ product.name }} - Mahsulot tafsilotlari{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/product_detail.css' %}">
+{% endblock %}
+
 {% block content %}
-<h3>Mahsulot haqida batafsil</h3>
-<h4>{{ product.name }} {{ product.sotish|intcomma }} so'm --- {{ product.son }} ta qolgan</h4>
-<a href="{% url 'product-update' product.slug %}">Tahrirlash</a>
-<a href="{% url 'sell-product' %}">Sotish</a>
-{% endblock content %}
+<div class="product-detail-container">
+    <div class="product-card">
+        <div class="product-header">
+            <h3><i class="fas fa-cube mr-2"></i> {{ product.name }}</h3>
+            <div class="product-price">{{ product.sotish|default:product.tannarx|intcomma }} so'm</div>
+            <div class="product-stock">
+                <i class="fas fa-boxes mr-1"></i> {{ product.son }} ta qolgan
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Chap ustun: Asosiy ma'lumotlar -->
+            <div class="info-section">
+                <div class="section-title"><i class="fas fa-info-circle mr-2"></i> Asosiy ma'lumotlar</div>
+                <div class="info-row">
+                    <div class="info-label">Kategoriya</div>
+                    <div class="info-value">{{ product.category.name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Rangi</div>
+                    <div class="info-value">{{ product.color }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Joylashuv</div>
+                    <div class="info-value">{{ product.place.name|default:"Belgilanmagan" }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Tannarx</div>
+                    <div class="info-value">{{ product.tannarx|intcomma }} so'm</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Sotish narxi</div>
+                    <div class="info-value">{{ product.sotish|default:"Belgilanmagan"|intcomma }} so'm</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Foyda</div>
+                    <div class="info-value">
+                        {% if product.sotish %}
+                            {{ product.sotish|add:"-"|add:product.tannarx|intcomma }} so'm (dona)
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- O'ng ustun: Holat va qo'shimcha -->
+            <div class="info-section">
+                <div class="section-title"><i class="fas fa-chart-line mr-2"></i> Ombor holati</div>
+                <div class="info-row">
+                    <div class="info-label">Soni</div>
+                    <div class="info-value">
+                        {% if product.son <= 0 %}
+                            <span class="badge badge-low">Tugagan</span>
+                        {% elif product.son <= 3 %}
+                            <span class="badge badge-low">{{ product.son }} ta (kam)</span>
+                        {% elif product.son <= 10 %}
+                            <span class="badge badge-medium">{{ product.son }} ta</span>
+                        {% else %}
+                            <span class="badge badge-high">{{ product.son }} ta (yetarli)</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">ID</div>
+                    <div class="info-value">#{{ product.id }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Slug</div>
+                    <div class="info-value">{{ product.slug }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tavsif -->
+        {% if product.description %}
+        <div class="px-6 pb-4">
+            <div class="section-title px-0"><i class="fas fa-align-left mr-2"></i> Tavsif</div>
+            <div class="description-text">
+                {{ product.description|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tugmalar -->
+        <div class="action-buttons">
+            <a href="{% url 'product-update' product.slug %}" class="btn-edit">
+                <i class="fas fa-edit"></i> Tahrirlash
+            </a>
+            <a href="{% url 'sell-product' %}" class="btn-sell">
+                <i class="fas fa-cart-plus"></i> Sotish
+            </a>
+            <form action="{% url 'product-delete' product.slug %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-delete">
+                    <i class="fas fa-trash-alt"></i> O‘chirish
+                </button>
+            </form>
+        </div>
+
+        <div class="back-link">
+            <a href="{% url 'product-list' %}">
+                <i class="fas fa-arrow-left"></i> Barcha mahsulotlarga qaytish
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/product_detail.js' %}"></script>
+{% endblock %}

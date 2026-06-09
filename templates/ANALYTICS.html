@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Analitika & Statistika{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <!-- Filtr paneli (kompakt) -->
+    <div class="filter-bar">
+        <form method="get" id="analytics-filter-form" class="filter-form">
+            <div class="filter-group">
+                <label><i class="fas fa-calendar-alt"></i> Boshlanish</label>
+                <input type="date" name="start_date" value="{{ start_date }}" class="filter-input" id="start_date">
+            </div>
+            <div class="filter-group">
+                <label><i class="fas fa-calendar-check"></i> Tugash</label>
+                <input type="date" name="end_date" value="{{ end_date }}" class="filter-input" id="end_date">
+            </div>
+            <button type="submit" class="btn-filter">Filtrlash</button>
+            <a href="?reset=1" class="btn-reset" id="reset-btn">Tozalash</a>
+        </form>
+    </div>
+
+    <!-- KPI kartalar (4 dona) -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon revenue"><i class="fas fa-dollar-sign"></i></div>
+            <div class="kpi-info">
+                <span class="kpi-label">Jami tushum</span>
+                <span class="kpi-value">{{ total_revenue|intcomma }} so'm</span>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon profit"><i class="fas fa-chart-line"></i></div>
+            <div class="kpi-info">
+                <span class="kpi-label">Sof foyda</span>
+                <span class="kpi-value text-emerald-600">{{ total_profit|intcomma }} so'm</span>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon sales"><i class="fas fa-shopping-cart"></i></div>
+            <div class="kpi-info">
+                <span class="kpi-label">Sotilgan dona</span>
+                <span class="kpi-value">{{ total_sales_count|intcomma }}</span>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon pending"><i class="fas fa-clock"></i></div>
+            <div class="kpi-info">
+                <span class="kpi-label">Kutilayotgan tushum</span>
+                <span class="kpi-value text-rose-600">{{ pending_value|intcomma }} so'm</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafiklar va jadvallar (2 ustun) -->
+    <div class="charts-row">
+        <!-- Chap: Chiziqli grafik -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-chart-line"></i> Sotuv va foyda o'sish trendi
+            </div>
+            <div class="chart-body">
+                <canvas id="trendChart" height="250"></canvas>
+            </div>
+        </div>
+        <!-- O'ng: Top 5 mahsulot gorizontal barchart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-trophy"></i> Eng ko'p sotilgan 5 mahsulot
+            </div>
+            <div class="chart-body">
+                <canvas id="topProductsChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Qo'shimcha jadvallar: Top lokatsiyalar va Kam qolgan mahsulotlar -->
+    <div class="details-row">
+        <div class="detail-card">
+            <div class="detail-header">
+                <i class="fas fa-map-marker-alt"></i> Eng daromadli omborlar (top 5)
+            </div>
+            <div class="detail-body">
+                <table class="minimal-table">
+                    <thead><tr><th>Ombor nomi</th><th>Tushum (so'm)</th></tr></thead>
+                    <tbody>
+                        {% for place in top_places %}
+                        <tr>
+                            <td>{{ place.product__place__name|default:"Noma'lum" }}</td>
+                            <td>{{ place.revenue|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2">Maʼlumot yo‘q</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="detail-card">
+            <div class="detail-header">
+                <i class="fas fa-exclamation-triangle"></i> Kam qolgan mahsulotlar (son &lt; 5)
+            </div>
+            <div class="detail-body">
+                <table class="minimal-table">
+                    <thead><tr><th>Mahsulot</th><th>Qolgan soni</th></tr></thead>
+                    <tbody>
+                        {% for p in low_stock_products %}
+                        <tr>
+                            <td>{{ p.name }} ({{ p.color|default:"rangsiz" }})</td>
+                            <td class="text-red-600 font-bold">{{ p.son }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2">Barcha mahsulotlar yetarli</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafik ma'lumotlarini JSON sifatida o'tkazish -->
+{{ chart_labels|json_script:"chart-labels" }}
+{{ chart_revenue|json_script:"chart-revenue" }}
+{{ chart_profit|json_script:"chart-profit" }}
+{{ top_products|json_script:"top-products" }}
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/analytics.js' %}"></script>
+{% endblock %}

@@ -1,20 +1,102 @@
 {% extends 'base.html' %}
-{% block content %}
-<h3>Sotilgan mahsulot haqida batafsil</h3>
-Nomi:{{ sold_product.product.name }}
-Rang:{{ sold_product.product.color }}
-Tannarx:{{ sold_product.product.tannax }}
-Sotildi:{{ sold_product.price }}
-Adress:{{ sold_product.address }}
-Egasi: {{ sold_product.owner }}
-Telefoon raqami: {{ sold_product.owner_phone }}
-{% if sold_product.delievered %}
-yetkazilgan
-Yetkazuvchi: {{ sold_product.delievered_by.get_full_name }}
-Yetkazilgan sana: {{ sold_product.delievered_at }}
-{% else %}
-yetkazilmagan
-<a href="{% url 'sold-product-deliever' sold_product.pk %}">yetkazish</a>
-{% endif %}
+{% load static %}
+{% load humanize %}
 
-{% endblock content %}
+{% block title %}Sotilgan mahsulot tafsilotlari{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/sold_product_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-card">
+        <div class="detail-header">
+            <h3><i class="fas fa-receipt mr-2"></i> Sotilgan mahsulot</h3>
+            <p>Buyurtma #{{ sold_product.id }} | {{ sold_product.sold_at|date:"d.m.Y H:i" }}</p>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-box"></i> Mahsulot nomi</div>
+                <div class="info-value large">{{ sold_product.product.name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-palette"></i> Rangi</div>
+                <div class="info-value">{{ sold_product.product.color }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-dollar-sign"></i> Tannarx (dona)</div>
+                <div class="info-value">{{ sold_product.product.tannarx|intcomma }} so'm</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-chart-line"></i> Sotilgan narx (dona)</div>
+                <div class="info-value">{{ sold_product.price|intcomma }} so'm</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-cubes"></i> Sotilgan miqdor</div>
+                <div class="info-value">{{ sold_product.quantity }} dona</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-chart-simple"></i> Umumiy foyda</div>
+                <div class="info-value {% if sold_product.profit >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                    {{ sold_product.profit|intcomma }} so'm
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-user"></i> Mijoz</div>
+                <div class="info-value">{{ sold_product.owner|default:"Ko'rsatilmagan" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-phone-alt"></i> Telefon raqam</div>
+                <div class="info-value">{{ sold_product.owner_phone|default:"Ko'rsatilmagan" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-map-marker-alt"></i> Yetkazish manzili</div>
+                <div class="info-value">{{ sold_product.address|default:"Ko'rsatilmagan"|linebreaks }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-tag"></i> Kategoriya</div>
+                <div class="info-value">{{ sold_product.product.category.name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-warehouse"></i> Joylashuv (ombor)</div>
+                <div class="info-value">{{ sold_product.product.place.name|default:"Belgilanmagan" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-info-circle"></i> Holati</div>
+                <div class="info-value">
+                    {% if sold_product.delievered %}
+                        <span class="status-badge status-delivered"><i class="fas fa-check-circle"></i> Yetkazilgan</span>
+                    {% else %}
+                        <span class="status-badge status-pending"><i class="fas fa-clock"></i> Yetkazilmagan</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if sold_product.delievered %}
+            <div class="deliver-info">
+                <div class="info-label"><i class="fas fa-truck"></i> Yetkazib berish ma'lumotlari</div>
+                <div class="info-value">Yetkazuvchi: {{ sold_product.delievered_by.get_full_name|default:sold_product.delievered_by.email }}</div>
+                <div class="info-value">Yetkazilgan sana: {{ sold_product.delievered_at|date:"d.m.Y H:i" }}</div>
+            </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            {% if not sold_product.delievered %}
+            <a href="{% url 'sold-product-deliever' sold_product.pk %}" class="btn-deliver">
+                <i class="fas fa-truck"></i> Yetkazish
+            </a>
+            {% endif %}
+            <a href="{% url 'sold-products' %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Sotilganlar ro'yxatiga qaytish
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/sold_product_detail.js' %}"></script>
+{% endblock %}

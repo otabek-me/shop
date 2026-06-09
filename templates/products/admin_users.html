@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Foydalanuvchilar{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold"><i class="fas fa-users"></i> Foydalanuvchilar</h1>
+    </div>
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th>ID</th><th>Ism/Familiya</th><th>Email</th><th>Telefon</th>
+                    <th>Sotgan</th><th>Yetkazgan</th><th>Ro'yxatdan o'tgan</th><th>Harakat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in users_data %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">{{ data.user.id }}</td>
+                    <td>{{ data.user.get_full_name|default:"-" }}</td>
+                    <td>{{ data.user.email }}</td>
+                    <td>{{ data.user.phone|default:"-" }}</td>
+                    <td>{{ data.sold_count }}</td>
+                    <td>{{ data.delivered_count }}</td>
+                    <td>{{ data.user.date_joined|date:"d.m.Y" }}</td>
+                    <td><a href="{% url 'admin-user-detail' data.user.pk %}" class="text-blue-600 hover:underline">Ko'rish</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center py-6">Hech qanday foydalanuvchi topilmadi</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+/* global.css */
+.nav-link.active {
+    @apply bg-indigo-100 text-indigo-700 font-semibold;
+}
+
+/* Form elementlarini Tailwindga moslashtirish */
+input, select, textarea {
+    @apply border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition;
+}
+
+label {
+    @apply block text-gray-700 font-medium mb-1 text-sm;
+}
+
+button, .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition shadow-sm;
+}
+
+.btn-primary {
+    @apply bg-indigo-600 text-white hover:bg-indigo-700;
+}
+
+.btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
+
+.btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.card {
+    @apply bg-white rounded-xl shadow-md p-5 border border-gray-100;
+}
+
+.table-auto th {
+    @apply text-left p-3 font-semibold text-gray-600 border-b;
+}
+.table-auto td {
+    @apply p-3 border-b border-gray-100;
+}
+
+/* Scrollbar (ixtiyoriy) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

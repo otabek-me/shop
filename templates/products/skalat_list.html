@@ -1,12 +1,79 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Omborlar ro'yxati{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/skalat_list.css' %}">
+{% endblock %}
+
 {% block content %}
-<h3>Skladlar ro'yxati</h3>
+<div class="skalat-list-container">
+    <div class="page-header">
+        <h3><i class="fas fa-warehouse text-green-600"></i> Omborlar ro'yxati</h3>
+        <a href="{% url 'create-skalat' %}" class="btn-primary">
+            <i class="fas fa-plus"></i> Yangi ombor
+        </a>
+    </div>
 
-{% for sklad in skalats %}
-    <a href="{% url 'skalat-detail' sklad.pk %}">{{ sklad.name }}</a>
-{% endfor %}
+    <div class="filters-bar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Ombor nomi bo'yicha qidirish...">
+        </div>
+    </div>
 
-<a href="{% url 'create-skalat' %}">Yangi</a>
+    <div class="table-wrapper">
+        <table class="skalat-table">
+            <thead>
+                <tr>
+                    <th>Ombor nomi</th>
+                    <th>Mahsulotlar soni</th>
+                    <th>Harakatlar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sklad in skalats %}
+                <tr class="skalat-row" data-name="{{ sklad.name }}">
+                    <td>
+                        <strong>{{ sklad.name }}</strong>
+                    </td>
+                    <td>
+                        <span class="product-count">
+                            <i class="fas fa-cubes"></i> {{ sklad.products.count }} ta mahsulot
+                        </span>
+                    </td>
+                    <td class="action-icons">
+                        <a href="{% url 'skalat-detail' sklad.pk %}" title="Batafsil">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <form method="post" action="{% url 'skalat-delete' sklad.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn" title="O'chirish">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="empty-state">
+                        <div id="emptyMessage">
+                            <i class="fas fa-warehouse"></i>
+                            <p>Hech qanday ombor topilmadi</p>
+                            <a href="{% url 'create-skalat' %}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">
+                                <i class="fas fa-plus"></i> Birinchi omborni qo'shing
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
 
-
-{% endblock content %}
+{% block extra_js %}
+    <script src="{% static 'js/skalat_list.js' %}"></script>
+{% endblock %}

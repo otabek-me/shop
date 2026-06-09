@@ -1,12 +1,90 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ skalat.name }} - Ombor tafsilotlari{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/skalat_detail.css' %}">
+{% endblock %}
+
 {% block content %}
-<h3>{{ skalat.name }} - skladi haqida batafsil</h3>
-<h4>Mahsulotlar</h4>
-{% for product in products %}
-    <a href="{% url 'product-detail' product.slug %}">{{ product.name }}  - {{ product.son }} dona</a>
-{% endfor %}
-<form method="post" action="{% url 'skalat-delete' skalat.pk %}">
-    {% csrf_token %}
-    <button type="submit">O'chirish</button>
-</form>
-{% endblock content %}
+<div class="skalat-detail-container">
+    <div class="detail-card">
+        <div class="detail-header">
+            <h3><i class="fas fa-warehouse mr-2"></i> {{ skalat.name }}</h3>
+            <p>Ombor haqida batafsil ma'lumot</p>
+            <div class="stats-badge">
+                <i class="fas fa-cubes"></i> Jami mahsulotlar: {{ products|length }} ta
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fas fa-boxes text-green-600"></i>
+                Ushbu ombordagi mahsulotlar
+            </div>
+
+            {% if products %}
+            <div class="products-table-wrapper">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Mahsulot nomi</th>
+                            <th>Rangi</th>
+                            <th>Soni</th>
+                            <th>Sotish narxi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'product-detail' product.slug %}" class="product-link">
+                                    {{ product.name }}
+                                </a>
+                            </td>
+                            <td>{{ product.color }}</td>
+                            <td>
+                                {% if product.son <= 0 %}
+                                    <span class="stock-badge stock-low">Tugagan</span>
+                                {% elif product.son <= 3 %}
+                                    <span class="stock-badge stock-low">{{ product.son }} dona</span>
+                                {% else %}
+                                    <span class="stock-badge stock-high">{{ product.son }} dona</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ product.sotish|default:product.tannarx }} so'm</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-products">
+                <i class="fas fa-box-open"></i>
+                <p>Bu omborda hali hech qanday mahsulot mavjud emas.</p>
+                <a href="{% url 'create-product' %}" class="btn-back" style="margin-top: 1rem; display: inline-flex;">
+                    <i class="fas fa-plus"></i> Yangi mahsulot qo'shish
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="action-buttons">
+                <form method="post" action="{% url 'skalat-delete' skalat.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-delete">
+                        <i class="fas fa-trash-alt"></i> Omborni o'chirish
+                    </button>
+                </form>
+                <a href="{% url 'skalat-list' %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Omborlar ro'yxatiga qaytish
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/skalat_detail.js' %}"></script>
+{% endblock %}

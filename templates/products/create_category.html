@@ -1,8 +1,54 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Yangi kategoriya qo'shish{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/create_category.css' %}">
+{% endblock %}
+
 {% block content %}
-<h3>Yangi category</h3>
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-</form>
-{% endblock content %}
+<div class="create-category-container">
+    <div class="category-card">
+        <div class="category-header">
+            <h3><i class="fas fa-tags mr-2"></i> Yangi kategoriya</h3>
+            <p>Mahsulotlaringizni tartibga solish uchun kategoriya qo'shing</p>
+        </div>
+        <div class="form-body">
+            <form method="post" id="create-category-form" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg mb-4 text-red-700 text-sm">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="input-group">
+                    <label for="{{ form.name.id_for_label }}">
+                        <i class="fas fa-font"></i> Kategoriya nomi
+                    </label>
+                    {{ form.name }}
+                    <div class="help-text">Masalan: "Elektronika", "Kiyim-kechak", "Oziq-ovqat"</div>
+                    {% if form.name.errors %}
+                        <ul class="errorlist">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-plus-circle mr-2"></i> Qo'shish
+                    </button>
+                    <a href="{% url 'create-product' %}" class="btn-cancel">
+                        <i class="fas fa-arrow-left mr-2"></i> Ortga
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/create_category.js' %}"></script>
+{% endblock %}

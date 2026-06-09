@@ -4,7 +4,7 @@ from django.urls import path
 
 from products.views import ProductListView, ProductDetailView, ProductDeleteView, CreateProductView, SkalatListView, \
     SkalatDetailView, SkalatDeleteView, CreateSkalatView, CreateCategoryView, UpdateProductView, SellProductView, \
-    SoldProductListView, SoldProductDetailView, DeliverSoldProductView
+    SoldProductListView, SoldProductDetailView, DeliverSoldProductView, AdminUserListView, AdminUserDetailView, StoreAnalyticsView
 
 urlpatterns = [
     path('', ProductListView.as_view(), name='product-list'),
@@ -24,4 +24,7 @@ urlpatterns = [
     path('sold-products/', SoldProductListView.as_view(), name='sold-products'),
     path('sold-product/<int:pk>', SoldProductDetailView.as_view(), name='sold-product-detail'),
     path('sold-product/<int:pk>/deliever', DeliverSoldProductView.as_view(), name='sold-product-deliever'),
-]
+
+    path('admin/users/', AdminUserListView.as_view(), name='admin-users'),
+    path('admin/user/<int:pk>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
+    path('analytics/', StoreAnalyticsView.as_view(), name='analytics')]

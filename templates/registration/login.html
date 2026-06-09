@@ -1,9 +1,69 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tizimga kirish{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
 {% block content %}
-<h2>Login</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form }}
-    <button type="submit">Submit</button>
-</form>
-{% endblock content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="p-6 md:p-8">
+            <div class="text-center mb-6">
+                <i class="fas fa-boxes text-5xl text-indigo-600 mb-3"></i>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">Xush kelibsiz</h2>
+                <p class="text-gray-500 mt-1">Tizimga kirish uchun maʼlumotlaringizni kiriting</p>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg mb-4 text-red-700 text-sm">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="input-group">
+                    <label for="{{ form.username.id_for_label }}">
+                        <i class="fas fa-envelope mr-1 text-indigo-500"></i> Email
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <ul class="errorlist">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <div class="input-group">
+                    <label for="{{ form.password.id_for_label }}">
+                        <i class="fas fa-lock mr-1 text-indigo-500"></i> Parol
+                    </label>
+                    <div class="password-wrapper">
+                        {{ form.password }}
+                        <button type="button" class="toggle-password" data-target="{{ form.password.id_for_label }}">
+                            <i class="far fa-eye-slash"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <ul class="errorlist">{% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Kirish
+                </button>
+
+                <div class="signup-link">
+                    Hisobingiz yo‘qmi? <a href="{% url 'signup' %}">Ro‘yxatdan o‘tish</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/login.js' %}"></script>
+{% endblock %}

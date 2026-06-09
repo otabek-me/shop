@@ -1,22 +1,109 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load humanize %}
+
+{% block title %}Sotilgan mahsulotlar{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/sold_product_list.css' %}">
+{% endblock %}
+
 {% block content %}
-<h3>Sotilgan mahsulotlar</h3>
-{% if user.is_superuser %}
-<p>Umumiy foyda - {{ sum_profit }}</p>
-{% endif %}
-<form method="get" >
-    {% csrf_token %}
-    <input type="date" name="start" value=" {{ request.GET.start }}" required>
-    <input type="date" name="end" value="{{ request.GET.end }}" required>
-    <button type="submit">submit</button>
-</form>
-<form method="get" id="delivery-form">
-    {% csrf_token %}
-    <label for="not-delivered">Yetkazilmaganlar</label>
-    <input type="checkbox" id="not-delivered" name="filterr" onchange="this.form.submit()">
-</form>
-{% for pro in sold_products %}
-    <a href="{% url 'sold-product-detail' pro.pk %}">{{ pro.product.name }}({{ pro.product.color }}) | Sotildi:{{ pro.price|intcomma }}/{{ pro.product.tannarx }} | Soni:{{ pro.quantity }} | Foyda:{{ pro.profit|intcomma }} | {% if pro.delievered %} Yetkazilgan {% else %} Yetkazilmagan {% endif %}</a><br>
-{% endfor %}
-{% endblock content %}
+<div class="sold-list-container">
+    <div class="page-header">
+        <h3><i class="fas fa-receipt text-indigo-600"></i> Sotilgan mahsulotlar</h3>
+        {% if user.is_superuser %}
+        <div class="profit-card">
+            <span><i class="fas fa-chart-line"></i> Umumiy foyda:</span>
+            <strong>{{ sum_profit|default:0|intcomma }} so'm</strong>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Filtrlar -->
+    <div class="filters-bar">
+        <form method="get" id="date-form" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+            <div class="filter-group">
+                <label><i class="fas fa-calendar-alt"></i> Boshlanish sanasi</label>
+                <input type="date" name="start" value="{{ request.GET.start|default:'' }}">
+            </div>
+            <div class="filter-group">
+                <label><i class="fas fa-calendar-check"></i> Tugash sanasi</label>
+                <input type="date" name="end" value="{{ request.GET.end|default:'' }}">
+            </div>
+            <button type="submit" class="btn-filter"><i class="fas fa-filter"></i> Filtr</button>
+        </form>
+
+        <form method="get" id="filter-form" style="margin-left: auto;">
+            <div class="filter-group checkbox">
+                <label for="filter-undelivered">❌ Yetkazilmaganlar</label>
+                <input type="checkbox" id="filter-undelivered" name="filterr" {% if request.GET.filterr %}checked{% endif %}>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sotilgan mahsulotlar jadvali -->
+    <div class="table-wrapper">
+        <table class="sold-table">
+            <thead>
+                <tr>
+                    <th>Mahsulot</th>
+                    <th>Rangi</th>
+                    <th>Sotilgan narx</th>
+                    <th>Soni</th>
+                    <th>Foyda</th>
+                    <th>Sotilgan sana</th>
+                    <th>Holati</th>
+                    <th>Harakat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pro in sold_products %}
+                <tr>
+                    <td>
+                        <div class="product-info">{{ pro.product.name }}</div>
+                        <div class="product-color">Kategoriya: {{ pro.product.category.name }}</div>
+                    </td>
+                    <td>{{ pro.product.color }}</td>
+                    <td>{{ pro.price|intcomma }} so'm<br><span class="text-xs text-gray-400">Tannarx: {{ pro.product.tannarx|intcomma }}</span></td>
+                    <td>{{ pro.quantity }} dona</td>
+                    <td class="{% if pro.profit > 0 %}text-green-600 font-semibold{% else %}text-red-500{% endif %}">
+                        {{ pro.profit|intcomma }} so'm
+                    </td>
+                    <td>{{ pro.sold_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        {% if pro.delievered %}
+                            <span class="status-badge status-delivered"><i class="fas fa-check-circle"></i> Yetkazilgan</span><br>
+                            <span class="text-xs text-gray-400">{{ pro.delievered_at|date:"d.m.Y" }}</span>
+                        {% else %}
+                            <span class="status-badge status-pending"><i class="fas fa-clock"></i> Yetkazilmagan</span>
+                        {% endif %}
+                    </td>
+                    <td class="action-icons">
+                        <a href="{% url 'sold-product-detail' pro.pk %}" title="Batafsil">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if not pro.delievered %}
+                        <a href="{% url 'sold-product-deliever' pro.pk %}" class="btn-deliver" title="Yetkazish">
+                            <i class="fas fa-truck"></i> Yetkazish
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <p>Hech qanday sotilgan mahsulot topilmadi</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/sold_product_list.js' %}"></script>
+{% endblock %}

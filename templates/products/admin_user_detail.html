@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ target_user.get_full_name|default:target_user.email }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold"><i class="fas fa-user-circle"></i> {{ target_user.get_full_name|default:target_user.email }}</h1>
+        <a href="{% url 'admin-users' %}" class="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300">← Orqaga</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-4 rounded-lg shadow text-center"><div class="text-3xl text-blue-600">{{ total_sold }}</div><div class="text-gray-600">Sotgan mahsulotlar</div></div>
+        <div class="bg-white p-4 rounded-lg shadow text-center"><div class="text-3xl text-green-600">{{ total_delivered }}</div><div class="text-gray-600">Yetkazilganlar</div></div>
+        <div class="bg-white p-4 rounded-lg shadow text-center"><div class="text-3xl text-purple-600">{{ total_revenue|intcomma }} so'm</div><div class="text-gray-600">Umumiy tushum</div></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow"><div class="border-b px-4 py-3 font-semibold">Sotgan mahsulotlari (oxirgi 20)</div>
+            <div class="p-4">{% if sold_products %}<table class="min-w-full text-sm"><thead><tr><th>Mahsulot</th><th>Soni</th><th>Narx</th><th>Sana</th></tr></thead><tbody>{% for sale in sold_products %}<tr><td>{{ sale.product.name }}</td><td>{{ sale.quantity }}</td><td>{{ sale.price|intcomma }} so'm</td><td>{{ sale.sold_at|date:"d.m.Y H:i" }}</td></tr>{% endfor %}</tbody></table>{% else %}<p class="text-gray-500">Hali hech qanday sotuv amalga oshirilmagan.</p>{% endif %}</div></div>
+
+        <div class="bg-white rounded-lg shadow"><div class="border-b px-4 py-3 font-semibold">Yetkazgan buyurtmalari (oxirgi 20)</div>
+            <div class="p-4">{% if delivered_products %}<table class="min-w-full text-sm"><thead><tr><th>Mahsulot</th><th>Mijoz</th><th>Sana</th></tr></thead><tbody>{% for item in delivered_products %}<tr><td>{{ item.product.name }}</td><td>{{ item.owner|default:"-" }}</td><td>{{ item.delievered_at|date:"d.m.Y H:i" }}</td></tr>{% endfor %}</tbody></table>{% else %}<p class="text-gray-500">Hali hech qanday buyurtma yetkazilmagan.</p>{% endif %}</div></div>
+    </div>
+</div>
+{% endblock %}

@@ -1,33 +1,101 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>{% block title %}MyStock | Ombor Boshqaruvi{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        /* Authenticated/unauthenticated elementlarni boshqarish */
+        body.authenticated .unauthenticated-only { display: none !important; }
+        body.unauthenticated .authenticated-only { display: none !important; }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <nav>
-        <a href="{% url 'home' %}"><h2>Home</h2></a>
-        {% if user.is_authenticated %}
-            <h4>Logged in as >> {{ user.get_full_name }}</h4>
-            <a href="{% url 'profile' %}"> | Profile | </a>
-            <a href="{% url 'profile-update' %}"> | Profile yangilash | </a>
-            <a href="{% url 'sold-products' %}">Sotilganlar</a>
-        {% else %}
-            <a href="{% url 'login' %}"> | Login | </a>
-            <a href="{% url 'signup' %}"> | Signup | </a>
-        {% endif %}
+<body class="bg-gray-50 {% if user.is_authenticated %}authenticated{% else %}unauthenticated{% endif %}">
 
+<div class="flex h-screen overflow-hidden">
+    <!-- SIDEBAR (faqat authenticated uchun) -->
+    <aside id="sidebar" class="authenticated-only bg-white shadow-xl w-72 flex-shrink-0 transition-all duration-300 -translate-x-full md:translate-x-0 z-20 fixed md:relative h-full overflow-y-auto">
+        <div class="p-5 border-b flex items-center justify-between">
+            <a href="{% url 'home' %}" class="text-2xl font-bold text-indigo-700"><i class="fas fa-boxes mr-2"></i>MyStock</a>
+            <button id="closeSidebarBtn" class="md:hidden text-gray-500 text-xl"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="p-4 space-y-2">
+            <a href="{% url 'product-list' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <i class="fas fa-cube w-5"></i><span>Mahsulotlar</span>
+            </a>
+            <a href="{% url 'skalat-list' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                <i class="fas fa-warehouse w-5"></i><span>Omborlar</span>
+            </a>
+            <a href="{% url 'sell-product' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                <i class="fas fa-cart-plus w-5"></i><span>Sotish</span>
+            </a>
+            <a href="{% url 'sold-products' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                <i class="fas fa-receipt w-5"></i><span>Sotilganlar</span>
+            </a>
+            <a href="{% url 'create-product' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                <i class="fas fa-plus-circle w-5"></i><span>Yangi mahsulot</span>
+            </a>
+            <a href="{% url 'create-skalat' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                <i class="fas fa-plus-circle w-5"></i><span>Yangi ombor</span>
+            </a>
+            <a href="{% url 'profile' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                <i class="fas fa-user-circle w-5"></i><span>Profil</span>
+            </a>
+            {% if user.is_superuser %}
+                <a href="{% url 'admin-users' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                    <i class="fas fa-users w-5"></i><span>Foydalanuvchilar</span>
+                </a>
+                <a href="{% url 'analytics' %}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 transition">
+                    <i class="fas fa-chart-line w-5"></i><span>Statistika</span>
+                </a>
+            {% endif %}
+            <form method="post" action="{% url 'logout' %}" class="mt-4">
+                {% csrf_token %}
+                <button type="submit" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition w-full text-left">
+                    <i class="fas fa-sign-out-alt w-5"></i><span>Chiqish</span>
+                </button>
+            </form>
+        </nav>
+    </aside>
 
-        <br>
-        <a href="{% url 'product-list' %}">Mahsulotlar</a>
-        <a href="{% url 'skalat-list' %}">Skladlar</a>
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top navbar -->
+        <header class="bg-white shadow-sm py-3 px-6 flex justify-between items-center">
+            <button id="openSidebarBtn" class="authenticated-only text-2xl md:hidden text-gray-600"><i class="fas fa-bars"></i></button>
+            <div class="flex items-center gap-4 ml-auto">
+                <span class="authenticated-only text-sm text-gray-600"><i class="far fa-user"></i> {{ user.get_full_name }}</span>
+                <div class="unauthenticated-only flex gap-3">
+                    <a href="{% url 'login' %}" class="text-indigo-600 hover:text-indigo-800 font-medium">Kirish</a>
+                    <span class="text-gray-300">|</span>
+                    <a href="{% url 'signup' %}" class="text-indigo-600 hover:text-indigo-800 font-medium">Ro‘yxatdan o‘tish</a>
+                </div>
+            </div>
+        </header>
 
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-3 rounded-lg shadow-sm {% if message.tags == 'success' %}bg-green-100 text-green-800 border-l-4 border-green-500{% else %}bg-blue-100 text-blue-800 border-l-4 border-blue-500{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
 
-        <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit">Chiqish</button>
-        </form>
-    </nav>
-    {% block content %}
-    {% endblock content %}
+<script src="{% static 'js/global.js' %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>
