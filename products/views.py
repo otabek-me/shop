@@ -208,7 +208,7 @@ class SoldProductListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         queryset = self.get_queryset()
-        sum_profit = queryset.aggregate(jami_foyda=Sum((F('product__tannarx') - F('price')) * F('quantity')))['jami_foyda']
+        sum_profit = queryset.aggregate(jami_foyda=Sum((F('price') - F('product__tannarx')) * F('quantity')))['jami_foyda']
         context['sum_profit'] = sum_profit if sum_profit else 0
         return context
 
