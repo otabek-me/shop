@@ -64,7 +64,7 @@ class HomePageView(TemplateView):
             # Oddiy user: faqat o'zi sotgan mahsulotlar
             context['total_sold'] = SoldProduct.objects.filter(seller=user).count()
             total_profit = SoldProduct.objects.filter(seller=user).aggregate(
-                total=Sum((F('product__tannarx') - F('price')) * F('quantity'))
+                total=Sum((F('price') - F('product__tannarx')) * F('quantity'))
             )['total']
             context['total_profit'] = total_profit if total_profit else 0
             context['recent_sales'] = SoldProduct.objects.filter(seller=user).select_related('product').order_by(
