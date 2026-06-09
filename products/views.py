@@ -46,7 +46,7 @@ class HomePageView(TemplateView):
             # Admin: barcha sotuvlar
             context['total_sold'] = SoldProduct.objects.count()
             total_profit = SoldProduct.objects.aggregate(
-                total=Sum((F('product__tannarx') - F('price')) * F('quantity'))
+                total=Sum((F('price') - F('product__tannarx')) * F('quantity'))
             )['total']
             context['total_profit'] = total_profit if total_profit else 0
             context['recent_sales'] = SoldProduct.objects.select_related('product', 'seller').order_by('-sold_at')[:5]
